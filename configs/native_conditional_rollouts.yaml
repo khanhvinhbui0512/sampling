@@ -1,0 +1,19 @@
+# New matched-target neural control; not upstream diffusion snapshot training.
+output_dir: workspace/data/qm9/rollouts
+profiled: false
+num_rollouts: null  # Lock after profiling, before evaluation.
+batch_size: 256
+snapshots_per_rollout: null  # Number of independent masks per terminal, not timesteps.
+seed: 1
+validation_fraction: 0.05
+split_seed: 42
+label_protocol: native_root_terminal_independent_masks_v1
+mask_distribution: uniform_mask_count_then_uniform_subset_v1
+# Every subset has positive probability. Choose count in {0,...,L} uniformly,
+# then a subset of that size uniformly, independent of tokens and reward.
+native:
+  steps: 32
+  noise_eps: 0.001
+  time_stop: 0.00001
+  final_denoise: true
+# Counts remain unset until the required profiling; no benchmark preset implied.

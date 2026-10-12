@@ -1,0 +1,12 @@
+# Locked evaluator choices; these do not set a benchmark sample count or budget.
+output_dir: workspace/results/summary
+diversity:
+  radius: 2       # CARS paper Appendix H.4; released code instead uses radius 3.
+  bits: 2048
+  include_chirality: false
+  max_molecules: 1000  # Project cost cap: seeded subset of valid OUTPUTS, duplicates kept.
+  seed: 17
+uncertainty:
+  confidence: 0.95
+  bootstrap_replicates: 2000
+  seed: 23

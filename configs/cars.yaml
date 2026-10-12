@@ -1,0 +1,75 @@
+# Step 8 library contract, not a runnable or paper-reproduction benchmark preset.
+task: qm9
+profiled: false
+ready_for_benchmark: false
+
+completion:
+  policy: rho_left_to_right
+  temperature: 1.0
+  preserve_future_observations: true
+  stop_on_eos: false
+
+oracle:
+  mode: leaf_only  # ARS: only exact terminal reward=0 can remove a leaf.
+  branch_mode: token_constraints  # Optional CARS with a conservative partial oracle.
+  smiles_grammar: null  # No supplied CARS functional-group grammar covers this target.
+
+discovery:
+  attempts: null  # Select by profiling before running a QM9 value query.
+  max_base_sequences: null  # Counts all nested model work, including failed draws.
+
+estimation:
+  draws: null  # Fixed m must be set BEFORE discovery; no success-dependent stopping.
+  freeze_trie: true
+  independent_rng: true
+  confidence: 0.95  # Project uncertainty setting, not a CARS paper hyperparameter.
+  interval: conditional_hoeffding  # Conservative fixed-m Bernoulli bound, scaled by B_W.
+  target: v_rho  # Not V* under the native masked-diffusion reference.
+
+memory:
+  max_nodes: null  # Profile and set a finite guard before a QM9 run.
+  on_limit: freeze_discovery
+
+cache:
+  reuse_scope: exact_initial_state_and_policy_reference_oracle
+  snapshot_schema: 1
+  persistent_cache: false  # Optional disk snapshots are implemented; disabled by default.
+  directory: workspace/cache/tries
+  max_entries: null  # Resident trie cap; set by profiling before a QM9 run.
+  pin_values_within_run: true  # Compact values survive trie LRU eviction.
+  format: json  # One immutable record contains trie, value, metadata and origin cost.
+
+generation:
+  max_attempts: null  # Fixed cap for RS/ARS/CARS generation; not estimation draws.
+
+# Separate Step 9 native conditional bridge. None of the rho settings above
+# are silently applied to this trajectory estimator. NOT runnable until profiled.
+native:
+  reference: normalized_native32_with_final_denoise
+  reference_config: configs/reference_checks.yaml  # qm9.native, shared calibration
+  target: reference_conditional_v_star
+  root: all_mask_including_special_positions
+  mode: cars  # Compatibility cones + exact terminal failures, no SMILES grammar.
+  discovery_attempts: null
+  discovery_max_base_sequences: null
+  numerator_draws: null  # Fixed independent draws after freezing W.
+  denominator_draws: null  # Unpruned native draws; keep reward-zero and duplicates.
+  mc_control_draws: null  # Fixed unpruned root draws for the matched MC control.
+  min_denominator_hits: null  # Lock uncertainty/ESS admission before evaluation.
+  max_nodes: null
+  max_cache_entries: null
+  confidence: 0.95
+  interval: hoeffding_joint_ratio
+  namespace: cars-native-trajectory
+  snapshot_schema: 1
+  persistent_cache: false
+  directory: workspace/cache/tries
+  profiled: false
+  enumeration_verified: false
+  ready_for_benchmark: false
+
+provenance:
+  paper: CARS Section 3, Algorithm 1 and equations 1-3
+  unchanged: raw probabilities; failure cones; surviving mass; reweighted proposal
+  project_additions: fixed-horizon QM9; masked context; frozen fixed-m value estimator; Hoeffding interval; exact-context cache
+  warning: unprofiled values are unset intentionally; this is not an experimental preset

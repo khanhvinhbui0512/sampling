@@ -1,0 +1,31 @@
+# Derived from MDM-VGB. Copyright (c) 2026 Kijung Jeon.
+# SPDX-License-Identifier: MIT; see THIRD_PARTY_NOTICES.md.
+# Architecture: MDM-VGB src/tasks/qm9/mdlm_source/config.json.
+# Training defaults: configs/qm9/qm9_base_model_training.yaml and
+# src/tasks/qm9/train_base_model.py. Not all are specified in the paper.
+# One GPU, one prepared QM9 dataset; vocabulary and length come from its manifest.
+task: qm9
+objective: mdlm
+model:
+  hidden_dim: 768
+  cond_dim: 128
+  n_blocks: 12
+  n_heads: 12
+  dropout: 0.1
+  time_conditioning: false
+training:
+  smiles_column: canonical_smiles
+  seed: 1
+  batch_size: 256
+  train_steps: 25000
+  lr: 0.0003
+  min_lr: 0.000003
+  warmup_steps: 1000
+  weight_decay: 0.0
+  clip_grad_norm: 1.0
+  time_min: 0.001
+  noise_eps: 0.001
+  precision: bf16
+  save_every: 5000
+  log_every: 20
+output_dir: workspace/model_data/qm9

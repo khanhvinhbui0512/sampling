@@ -1,0 +1,20 @@
+# Architecture/optimization from upstream qm9_verifier_training.yaml/train_verifier.py.
+output_dir: workspace/model_data/qm9/verifier
+model:
+  hidden_dim: 256
+  num_layers: 4
+  num_heads: 4
+  dropout: 0.1
+training:
+  epochs: 200
+  batch_size: 2048  # Upstream global batch; this project uses one GPU.
+  lr: 0.0001
+  weight_decay: 0.0
+  seed: 1
+  clip_grad_norm: 1.0
+  save_every_epochs: 10  # Project addition; includes optimizer/RNG for resume.
+# Choose --policy explicitly. Data and checkpoints are separate per target.
+targets:
+  native: native_trajectory_terminal_pass95
+  rho: q_rho_terminal_pass95
+  native-conditional: native_root_terminal_independent_mask_pass95

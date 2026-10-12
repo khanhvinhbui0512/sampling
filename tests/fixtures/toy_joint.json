@@ -1,0 +1,25 @@
+{
+  "description": "Three binary sites. The test backbone uses only the contiguous known prefix, so future observations distinguish q_rho from conditional pi_rho.",
+  "token_rules": {"vocab_size": 3, "sequence_length": 3, "mask_id": 0},
+  "reveal_order": [0, 1, 2],
+  "support": [1, 2],
+  "leaves": [
+    {"tokens": [1, 1, 1], "probability": 0.30, "reward": 1},
+    {"tokens": [1, 1, 2], "probability": 0.10, "reward": 0},
+    {"tokens": [1, 2, 1], "probability": 0.05, "reward": 1},
+    {"tokens": [1, 2, 2], "probability": 0.05, "reward": 0},
+    {"tokens": [2, 1, 1], "probability": 0.05, "reward": 0},
+    {"tokens": [2, 1, 2], "probability": 0.05, "reward": 1},
+    {"tokens": [2, 2, 1], "probability": 0.10, "reward": 0},
+    {"tokens": [2, 2, 2], "probability": 0.30, "reward": 1}
+  ],
+  "states": [
+    {"name": "root", "tokens": [0, 0, 0]},
+    {"name": "prefix", "tokens": [1, 0, 0]},
+    {"name": "future_observation", "tokens": [0, 0, 2]},
+    {"name": "hole", "tokens": [1, 0, 2]},
+    {"name": "success", "tokens": [1, 1, 1]},
+    {"name": "failure", "tokens": [1, 1, 2]}
+  ],
+  "expected_future_observation": {"v_rho": 0.5, "v_star_pi_rho": 0.7}
+}

@@ -1,0 +1,53 @@
+# Step 6 library settings; the generation CLI/Modal task belongs to Step 10.
+task: qm9
+base_method: base_native  # Use base_rho for a separately labelled rho comparison.
+native_settings:
+  steps: 32
+  noise_eps: 0.001
+  time_stop: 0.00001
+  final_denoise: true
+
+candidates:
+  L_f: 8
+  L_b: 32
+  K: 8  # Independent draws WITH replacement at each selected position; not top-k.
+  lambda_value: 0.0
+  temperature: 1.0
+  forward_selection: random
+  backward_selection: low_conf
+
+bon:
+  N: 16
+  ranking: binary_reward  # Paper Algorithm 1. Optional project ablation: qed.
+  tie: first
+
+walk:
+  step_limit: 512  # n * N = 32 * 16; includes backtracks, switches and stays.
+  time_limit_seconds: null  # Cooperative deadline between steps, not a GPU interrupt.
+
+momentum:
+  chi: 1.0
+  include_stay: true  # Definition 4.3. Upstream omits stay and renormalizes.
+
+budget:
+  base_sequence_limit: 528  # 16 * (32 + final denoise): funds a full native BoN group.
+  # Project hard cap, INCLUDING nested MC + completion; not the paper's step cap.
+  verifier_sequence_limit: null
+  exhaustion: reserved_unguided_completion
+  # Completion uses the explicitly selected base_method, with original context fixed.
+  # This differs from upstream's shortlisted, value-guided forced completion.
+
+protocol:
+  leaf_success: pass95  # Upstream QM9 terminal_accept checks validity only.
+  failed_leaf: uniform_singleton_backtrack
+  zero_mass: backtrack_or_reserved_completion  # VGR uses empirical base candidates.
+  freeze_values: per_run_full_masked_state
+  unfinished: failure
+  target_claim: finite_budget_heuristic
+
+provenance:
+  paper: MDM-VGB Definitions 4.2-4.3, Algorithms 1-4, Appendix F.3 Table 7
+  upstream: MDM-VGB-main/configs/qm9/qm9_inference.yaml
+  unchanged: singleton blocks; L_f=8; L_b=32; K=8; lambda=0; chi=1; N=16
+  project_changes: hard total work cap; reserved unguided completion; Pass@95 acceptance; no epsilon floor; paper terminal gate; momentum stay option; per-run value freeze
+  reference_warning: native trajectory values and rho completion values are different targets

@@ -1,0 +1,42 @@
+# Sources and paper/code differences are documented in PAPER_CHECK.md.
+task: qm9
+
+dataset:
+  repo_id: yairschiff/qm9
+  revision: main  # Resolve to a commit SHA when preparing assets.
+  split: train
+  smiles_column: smiles
+  held_out_fraction: 0.05  # Upstream code: train_test_split(test_size=0.05, seed=42).
+  split_seed: 42
+  expected_train_rows: 127190  # MDM-VGB, Appendix F.1.
+  expected_test_rows: 6695
+  cache_dir: workspace/cache/huggingface/datasets
+
+tokenizer:
+  repo_id: yairschiff/qm9-tokenizer
+  revision: main
+  sequence_length: 32  # MDM-VGB, Appendix F.3, Table 7.
+  required_special_tokens: [mask, pad, unk]  # Read actual IDs from the tokenizer.
+  add_special_tokens: true
+  padding_side: right
+  truncation_side: right
+  overlength_policy: record_and_truncate  # Audit here; training is a later step.
+  terminal_policy: strict_special_tokens_v1
+
+chemistry:
+  canonical: true
+  isomeric_smiles: true
+  sanitize: true
+  parse_names: false
+  allow_cxsmiles: false
+  heavy_atom_limit: 9  # Diagnostic only; not an extra reward constraint.
+
+reward:
+  score: qed_or_zero  # MDM-VGB, Appendix F.1.
+  binary: pass95
+  quantile: 0.95
+  threshold_source: independent_base_calibration  # Appendix F, Pass@alpha.
+  calibration_manifest: null  # Fill with the completed Step 4 calibration manifest after running it.
+
+assets:
+  output_dir: workspace/data/qm9

@@ -1,0 +1,40 @@
+# Local environments, editor state and build products.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+/build/
+/dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.DS_Store
+.idea/
+.vscode/
+
+# Credentials and agent-local state.
+.env
+.env.*
+!.env.example
+.aws/
+.codex/
+.agents/
+.modal.toml
+modal.toml
+credentials.json
+*.pem
+*.key
+
+# Reference-only archives; runtime packaging also excludes these.
+/resource/
+
+# Reproducible artifacts belong in their manifests, not in Git.
+/data/
+/model_data/
+/cache/
+/results/
+/logs/
+/wandb/
+/workspace/

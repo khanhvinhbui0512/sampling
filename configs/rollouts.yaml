@@ -1,0 +1,20 @@
+# Collection defaults come from upstream configs/qm9/qm9_rollout.yaml.
+output_dir: workspace/data/qm9/rollouts
+num_rollouts: 127190  # Upstream uses all train examples; QM9 sampling is unconditional.
+batch_size: 256
+snapshots_per_rollout: 5
+seed: 1  # Project choice; upstream rollout YAML does not specify a seed.
+validation_fraction: 0.05  # Project addition: split complete rollout groups.
+split_seed: 42
+native:
+  steps: 128  # Distinct from the 32-step BASE inference/calibration policy.
+  noise_eps: 0.001
+  time_stop: 0.00001
+  final_denoise: true  # Step 4 addition, counted in sampling cost.
+rho:
+  temperature: 1.0
+# MC defaults are project choices, not QM9 settings claimed by the paper.
+mc:
+  draws: 128
+  draw_batch_size: 256
+  confidence: 0.95

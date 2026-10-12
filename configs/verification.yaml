@@ -1,0 +1,5 @@
+# Step 12 verification only; these are not paper experiment settings.
+output_dir: workspace/results/raw
+selection: [tests]
+gpu_smoke: false
+cpu_threads: 2

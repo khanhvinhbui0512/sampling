@@ -1,0 +1,29 @@
+# Step 10 exploratory panel/check settings, not a paper benchmark preset.
+output_dir: workspace/data/qm9/value_panels
+check_output_dir: workspace/results/value_checks
+seed: 7
+panel:
+  max_per_stratum: null  # Lock after profiling, before looking at estimator results.
+  terminal_draws: null  # Used only when no source generation manifests are supplied.
+  snapshot_steps: [0, 8, 16, 24, 31]  # Project panel design for native32, not paper settings.
+  strata: [root, prefix, hole, native_snapshot, rho_snapshot, walk_snapshot, terminal]
+reference:
+  draws: null  # Independent fixed-count MC reference; never labelled exact on QM9.
+  min_denominator_hits: null
+  confidence: 0.95
+budget:
+  base_sequence_limit: null  # Per query; fixed estimator draw counts still bound work.
+  verifier_sequence_limit: null
+toy:
+  fixture: tests/fixtures/toy_joint.json
+  steps: 2
+  noise_eps: 0.001
+  time_stop: 0.2
+  final_denoise: true
+  discovery_attempts: 8
+  numerator_draws: 256
+  denominator_draws: 1024
+  mc_draws: 1024
+  min_denominator_hits: 5
+  max_nodes: 5000
+  confidence: 0.95

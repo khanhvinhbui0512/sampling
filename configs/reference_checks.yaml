@@ -1,0 +1,62 @@
+# These reference/check/calibration choices are project settings, not paper results.
+toy:
+  fixture: tests/fixtures/toy_joint.json
+  reference: pi_rho_from_fully_masked_root
+  proposal: q_rho_given_all_known_tokens
+  reveal_order: left_to_right
+  enumeration: true
+  # Budgets for the later value-check task; Step 4 does not run estimators.
+  mc_draws: 10000
+  importance_draws: 10000
+  seed: 7
+  support_assumption: every_compatible_positive_joint_leaf_has_positive_proposal_probability
+  native:
+    root: all_mask
+    steps: 2
+    noise_eps: 0.001
+    time_stop: 0.2  # Large residual probability makes endpoint/self loops visible in toy checks.
+    final_denoise: true
+    enumeration: true
+
+qm9:
+  reference: pi_rho_from_fully_masked_root  # Not the native diffusion joint.
+  proposal: q_rho_given_all_known_tokens
+  reveal_order: left_to_right
+  temperature: 1.0
+  support: all_non_mask_tokens  # Includes special tokens; no grammar filtering.
+  importance_enabled: false  # Enable only after the later toy/pilot checks.
+  native_reference:
+    protocol: normalized_native32_with_final_denoise
+    root: all_mask_including_special_positions
+    target: reference_conditional_v_star
+    event: terminal_matches_every_observed_token
+    law: native_root_trajectory  # NOT a fresh rollout started at the query state.
+    schedule: loglinear
+    settings_from: qm9.native
+    endpoint: counted_transition_to_zero
+    token_draws: independent_given_start_of_step_logits
+    stop_on_eos: false
+    denominator: unpruned_native_root_draws_including_reward_zero
+    support: require_positive_compatible_terminal_mass
+    gate_passed: false  # Enumeration/profiling have not been executed.
+  diagnostics:
+    rho_joint: pi_rho_from_fully_masked_root
+    rho_completion: q_rho_given_all_known_tokens
+    upstream_verifier: native128_trajectory_snapshots
+    # These three laws/label targets remain distinct from native32 V*.
+  native:
+    steps: 32  # Upstream qm9_inference.yaml; distinct from 128-step verifier rollouts.
+    noise_eps: 0.001  # Upstream harness log-linear schedule.
+    time_stop: 0.00001  # Upstream harness endpoint.
+    final_denoise: true  # Project addition: remove any residual MASK, with counted NFE.
+  calibration:
+    sampler: base_native  # One shared BASE threshold for all later methods.
+    sample_count: 10000  # Paper does not specify the QM9 calibration size.
+    batch_size: 256  # Upstream inference batch size; not a calibration-size claim.
+    seed: 2026  # Project choice, using a calibration-only RNG namespace.
+    quantile: 0.95  # Paper Appendix F.
+    quantile_method: linear  # Project convention; includes invalid scores of zero.
+    bootstrap_replicates: 1000  # Project uncertainty diagnostic, not a paper setting.
+    confidence: 0.95
+    zero_threshold_policy: require_valid_molecule
+    output_dir: workspace/data/qm9/calibration

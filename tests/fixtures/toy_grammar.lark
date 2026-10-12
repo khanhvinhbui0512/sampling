@@ -1,0 +1,3 @@
+// Finite language: a, abb, ba. Tests append EOS and PAD to a fixed horizon.
+// At horizon 3, prefix ab is impossible: b and EOS still need two positions.
+start: "a" | "a" "b" "b" | "b" "a"
