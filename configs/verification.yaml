@@ -1,0 +1,74 @@
+# Test selection is configuration-driven; future test files are not imported here.
+verification:
+  phase: environment
+  pytest_args: [-q]
+  check_installed_dependencies: true
+  phases:
+    environment:
+      tests: [tests/test_resource_isolation.py]
+      project_files:
+        - pyproject.toml
+        - src/__init__.py
+        - src/tasks/common.py
+        - modal/common.py
+        - modal/verify.py
+        - configs/common.yaml
+        - configs/modal.yaml
+        - tests/conftest.py
+      artifacts: {}
+    benchmark:
+      tests: [tests/test_data_reward.py]
+      project_files:
+        - assets/benchmark/source.json
+        - assets/benchmark/smarts.json
+        - assets/benchmark/acrylates.prompt.txt
+        - assets/benchmark/acrylates.examples.smi
+        - assets/benchmark/acrylates.lark
+        - assets/benchmark/chain_extenders.prompt.txt
+        - assets/benchmark/chain_extenders.examples.smi
+        - assets/benchmark/chain_extenders.lark
+        - assets/benchmark/isocyanates.prompt.txt
+        - assets/benchmark/isocyanates.examples.smi
+        - assets/benchmark/isocyanates.lark
+      artifacts:
+        benchmark: {path: data/benchmark/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+    corpus:
+      tests: [tests/test_data_reward.py]
+      project_files: []
+      artifacts:
+        corpus: {path: data/corpus/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
+        vocabulary: {path: data/tokenizer/vocab.json, manifest: false, kind: null, checksum: null, metadata: {}}
+        train_tokens: {path: data/tokenized/train/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+        validation_tokens: {path: data/tokenized/validation/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+        test_tokens: {path: data/tokenized/test/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+    cars:
+      tests: [tests/test_cars.py]
+      project_files: []
+      artifacts:
+        benchmark: {path: data/benchmark/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
+    values:
+      tests: [tests/test_values.py]
+      project_files: []
+      artifacts:
+        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
+        # Select a specific rollout run; never silently choose a latest run.
+        rollouts: {path: null, manifest: true, kind: null, checksum: null, metadata: {}}
+    integration:
+      tests: [tests/test_integration.py]
+      project_files: []
+      artifacts:
+        benchmark: {path: data/benchmark/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
+        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
+        # These metadata paths identify the checkpoints selected for the run.
+        mdlm_checkpoint: {path: null, manifest: false, kind: null, checksum: null, metadata: {}}
+        verifier_checkpoint: {path: null, manifest: false, kind: null, checksum: null, metadata: {}}
+    metrics:
+      tests: [tests/test_metrics.py]
+      project_files: []
+      artifacts:
+        # The run manifest must be completed; its declared files are checked.
+        generation_run: {path: null, manifest: false, kind: null, checksum: null, metadata: {}, run_record: true}
+    all:
+      includes: [environment, benchmark, corpus, cars, values, integration, metrics]

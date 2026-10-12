@@ -1,0 +1,80 @@
+# CARS prompts/grammars/SMARTS are replicated; ChEMBL training and preprocessing
+# below are new settings for the shared SMILES MDLM, not either paper's corpus.
+data:
+  benchmark:
+    commit: f46607f983d89e4ca4f40527cd231ab04adc6ed7
+    source_file: source.json
+    source_sha256: b9d85a5a1371b5ae816c06b7c0f1d1822ab4db60fd3c411de118ebe56a7947ca
+    expected_counts: {acrylates: 32, chain_extenders: 11, isocyanates: 11}
+    examples_file: examples.parquet
+    manifest_file: manifest.json
+    preserve_original_rows: true
+    mismatch_policy: report
+
+  corpus:
+    name: chembl
+    version: 36
+    url: https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_36/chembl_36_chemreps.txt.gz
+    sha256: f9c2fa730ac5000da9b0c0d4033c99bfd8fe2b99950f19df1d842c6e73dd7cc4
+    checksums_url: https://ftp.ebi.ac.uk/pub/databases/chembl/ChEMBLdb/releases/chembl_36/checksums.txt
+    license: CC-BY-SA-3.0
+    format: gzip_tsv
+    id_column: chembl_id
+    smiles_column: canonical_smiles
+    # Relative to the configured artifact root; the original archive is retained.
+    archive: data/raw/chembl_36_chemreps.txt.gz
+    exclude_all_prompt_identities: true
+    classifier: original_smarts
+    multilabel: true
+
+  normalization:
+    identity_version: rdkit-canonical-isomeric-no-atom-maps-v1
+    sanitize: true
+    canonical: true
+    isomeric: true
+    remove_atom_maps: true
+    remove_ordinary_explicit_hydrogens: true
+    neutralize: false
+    canonicalize_tautomers: false
+    select_largest_fragment: false
+    strip_invalid_tokens: false
+    allow_smiles_names: false
+    allow_cxsmiles: false
+
+  filters:
+    require_membership: true
+    allow_disconnected: false
+    allow_dummy_atoms: false
+    max_heavy_atoms: null
+    # No QM9 nine-heavy-atom or C/N/O/F restriction is imposed on this benchmark.
+
+  split:
+    seed: 0
+    fractions: [0.8, 0.1, 0.1]
+    unit: molecule
+    algorithm: seeded_sha256_sort
+    rounding: floor_train_validation_test_remainder
+    stratified: false
+
+  augmentation:
+    seed: 0
+    train_only: true
+    algorithm: atom_permutation
+    random_variants: 2
+    max_attempts_per_variant: 20
+    keep_canonical: true
+    verify_identity: true
+
+  tokenizer:
+    version: smiles-lexical-v1
+    vocabulary_from: train
+    special_tokens: ["<pad>", "<mask>", "<eos>"]
+    unknown_policy: reject_and_report
+    overlength_policy: reject_and_report
+    # Initial choice; changes must be selected using train/validation statistics.
+    max_length: 256
+    include_eos_in_length: true
+    vocabulary_path: data/tokenizer/vocab.json
+    metadata_path: data/tokenizer/metadata.json
+    length_report_path: data/tokenizer/lengths.json
+    shard_rows: 10000

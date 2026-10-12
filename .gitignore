@@ -1,0 +1,44 @@
+# Python bytecode, tool caches, and coverage output.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.ipynb_checkpoints/
+/.cache/
+
+# Local virtual environments and Conda prefixes.
+/.venv/
+/venv/
+/env/
+/envs/
+/.conda/
+
+# Packaging artifacts.
+/build/
+/dist/
+*.egg-info/
+.eggs/
+
+# Downloaded references and generated experiment artifacts.
+/resource/
+/data/
+/checkpoints/
+/outputs/
+/reports/
+
+# Local environment variables; example files remain trackable.
+.env
+.env.*
+!.env.example
+
+# Operating system metadata.
+.DS_Store
+Thumbs.db
+
+# Keep src/, modal/, assets/, configs/, tests/, documentation,
+# pyproject.toml, and requirements.lock in version control.

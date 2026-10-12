@@ -1,0 +1,87 @@
+defaults: [data.yaml]
+
+# The optimization baseline follows MDM-VGB's QM9 base-model config.
+# ChEMBL, 256 positions, three group labels, and time conditioning
+# are explicit adaptations. The resulting parameter count is measured, not 92.4M by assumption.
+mdlm:
+  version: smiles-group-mdlm-v1
+  initialization: scratch
+  architecture:
+    layers: 12
+    hidden_size: 768
+    heads: 12
+    conditioning_size: 128
+    feedforward_ratio: 4
+    dropout: 0.1
+    max_length: 256
+    time_conditioning: true
+    group_conditioning: true
+    position_encoding: rotary
+  diffusion:
+    schedule: loglinear
+    epsilon: 0.001
+    minimum_time: 0.001
+    # PAD is learned like the QM9 reference, enabling generation of padded tails.
+    mask_pad: true
+    objective: masked_elbo_per_fixed_width_token
+  training:
+    steps: 25000
+    global_batch_size: 256
+    micro_batch_size: 32
+    learning_rate: 0.0003
+    minimum_learning_rate: 0.000003
+    warmup_steps: 1000
+    weight_decay: 0.0
+    gradient_clip: 1.0
+    optimizer: adamw
+    betas: [0.9, 0.999]
+    adam_epsilon: 0.00000001
+    scheduler: warmup_cosine
+    device: auto
+    dtype: bfloat16
+    # New row/label sampling for augmented multi-label ChEMBL; no duplicate group rows.
+    row_sampling: uniform_with_replacement
+    group_sampling: uniform_matching_group
+    cache_shards: 2
+    log_every: 20
+    validate_every: 1000
+    save_every: 5000
+  validation:
+    split: validation
+    batch_size: 32
+    seed: 1729
+    max_rows: null
+    selection: minimum_masked_elbo
+  completion:
+    trie_policy: left_to_right
+    reference_policy: absorbing_reverse
+    steps: 128
+    end_time: 0.00001
+    final_denoise: true
+    temperature: 1.0
+    top_p: 1.0
+    top_k: 0
+
+# Smoke uses the same tokenizer/width, but a separate architecture and run suite.
+# It cannot be reported as a primary trained model.
+suites:
+  smoke:
+    mdlm:
+      architecture:
+        layers: 2
+        hidden_size: 128
+        heads: 4
+        conditioning_size: 64
+      training:
+        steps: 8
+        global_batch_size: 8
+        micro_batch_size: 4
+        warmup_steps: 2
+        log_every: 1
+        validate_every: 4
+        save_every: 4
+      validation:
+        batch_size: 4
+        max_rows: 32
+      completion:
+        steps: 8

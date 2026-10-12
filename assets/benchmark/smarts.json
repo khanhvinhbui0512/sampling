@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "matcher": "rdkit_has_substruct_match_any",
+  "use_chirality": false,
+  "groups": {
+    "acrylates": ["C=CC(=O)O*"],
+    "chain_extenders": ["CO", "OC", "N"],
+    "isocyanates": ["[*]N=C=O"]
+  },
+  "notes": [
+    "These patterns reproduce eval_membership in the pinned CARS evaluation source.",
+    "Chain extender membership uses OR over CO, OC, N and does not require difunctionality.",
+    "Membership labels may overlap across groups.",
+    "The original grammars allow GROUP_SYMBOL alternatives but do not require their occurrence.",
+    "Prompt novelty and selection uniqueness are separate from terminal reward."
+  ]
+}

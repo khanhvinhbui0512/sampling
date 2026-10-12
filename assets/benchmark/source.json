@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "repository": "https://github.com/pparys/cars",
+  "commit": "f46607f983d89e4ca4f40527cd231ab04adc6ed7",
+  "raw_base_url": "https://raw.githubusercontent.com/pparys/cars/f46607f983d89e4ca4f40527cd231ab04adc6ed7/",
+  "paper": "https://arxiv.org/abs/2510.01902v2",
+  "paper_section": "Appendix H",
+  "license": "Unspecified in the pinned benchmark repository; see THIRD_PARTY_NOTICES.md.",
+  "copy_rule": "Prompts and grammars are byte-for-byte copies. Example files contain the SMILES following each nonempty 'Molecule: ' line, in source order, with LF line endings and a final LF. No example is corrected or removed.",
+  "groups": {
+    "acrylates": {
+      "count": 32,
+      "prompt_source": "datasets/smiles/acrylates.txt",
+      "grammar_source": "datasets/smiles/acrylates.lark",
+      "example_source_lines": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+    },
+    "chain_extenders": {
+      "count": 11,
+      "prompt_source": "datasets/smiles/chain_extenders.txt",
+      "grammar_source": "datasets/smiles/chain_extenders.lark",
+      "example_source_lines": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    },
+    "isocyanates": {
+      "count": 11,
+      "prompt_source": "datasets/smiles/isocyanates.txt",
+      "grammar_source": "datasets/smiles/isocyanates.lark",
+      "example_source_lines": [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    }
+  },
+  "membership_source": {
+    "path": "experiments/smiles/evaluate_molecules.py",
+    "function": "eval_membership",
+    "sha256": "19084bd68ac0b689bc534615a7291bbf75a060ccc39294b8be7cab0611e41f2d",
+    "change": "Only the SMARTS strings and OR matching rule are transcribed into smarts.json; source code is not copied."
+  },
+  "files": {
+    "acrylates.prompt.txt": "b5860a67b89fe4c104e17ab14209bd77d34f2f22bc17b7f786d6fbdb4966185c",
+    "acrylates.examples.smi": "90f3ed44655a25d694f7f211dfc31c7943d65cb44c6ec513636fa13cbac2314a",
+    "acrylates.lark": "243205bdc6d55319f7398d13d8e1860e51175895928439e15220c5502e880c45",
+    "chain_extenders.prompt.txt": "7762d86932c69ec38255b5800b5d5d3c2db2cfbba3b702545166cb4f81d8e77f",
+    "chain_extenders.examples.smi": "5bc834a1eb8e4613218c1636386713de543d30c272a1fc7d1d0703126d25d76c",
+    "chain_extenders.lark": "4e4d0148326be39a09924226d16cd5d42afee6f16b23e53f1352e629bf0f5398",
+    "isocyanates.prompt.txt": "b285883e131ed2ba7e0312196c0745864b199629f46b7c62287e18809983e31d",
+    "isocyanates.examples.smi": "ff874bf153fd9579875b250a003288a9e8569bd42ded52a09b10a031a63ea084",
+    "isocyanates.lark": "6bb64d8597b19202c160ea6a08f797f5b7118b12732e13c510dca06df4bdc2d5",
+    "smarts.json": "eaf05a9f167c5c26658b436c1813e33ee3753668de3eb10d3a79a4619758e25d"
+  }
+}

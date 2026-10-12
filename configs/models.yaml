@@ -1,0 +1,64 @@
+# Llama follows CARS; RetroStar is the one-step metric in its reference code.
+# No pretrained QM9 weights are used for the primary ChEMBL MDLM.
+models:
+  download: [llama, retrostar]
+  llama:
+    backend: huggingface
+    model_id: meta-llama/Llama-3.1-8B-Instruct
+    revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    tokenizer_id: meta-llama/Llama-3.1-8B-Instruct
+    tokenizer_revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    directory: checkpoints/pretrained/llama-3.1-8b-instruct
+    manifest: checkpoints/pretrained/llama-3.1-8b-instruct/manifest.json
+    license: llama3.1
+    role: cars_ar_replication
+    dtype: bfloat16
+    device_map: auto
+    temperature: 1.0
+    top_p: 1.0
+    top_k: 0
+    chat_template: tokenizer
+    required_files:
+      - config.json
+      - generation_config.json
+      - model.safetensors.index.json
+      - model-00001-of-00004.safetensors
+      - model-00002-of-00004.safetensors
+      - model-00003-of-00004.safetensors
+      - model-00004-of-00004.safetensors
+      - special_tokens_map.json
+      - tokenizer.json
+      - tokenizer_config.json
+      - LICENSE
+      - USE_POLICY.md
+  retrostar:
+    backend: figshare
+    model_id: syntheseus-retro-star-benchmark/reaction-model
+    revision: figshare-25376728-v1
+    source_repository: https://github.com/AustinT/syntheseus-retro-star-benchmark
+    source_revision: 2f4e2fa20a5c83c667d7b4de5bce3a35f1420520
+    metadata_url: https://api.figshare.com/v2/articles/25376728/versions/1
+    article_id: 25376728
+    article_version: 1
+    directory: checkpoints/pretrained/retrostar
+    manifest: checkpoints/pretrained/retrostar/manifest.json
+    license: MIT
+    role: one_step_retrosynthesis_metric
+    # This classifier uses reaction templates and molecular fingerprints, not an LM tokenizer.
+    tokenizer: null
+    required_files: [pretrained-reaction-model.ckpt, template_rules_1.dat]
+    files:
+      pretrained-reaction-model.ckpt:
+        file_id: 44956078
+        url: https://ndownloader.figshare.com/files/44956078
+        size: 786637894
+        md5: cf28c8792682c8596d95ff7d460ddd56
+      template_rules_1.dat:
+        file_id: 44956072
+        url: https://ndownloader.figshare.com/files/44956072
+        size: 88916403
+        md5: 3b2247b52de915ea5ac39ddcb7c5de37
+  mdlm:
+    initialization: scratch
+    role: shared_primary_model
+    pretrained_model: null

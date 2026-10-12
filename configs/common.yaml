@@ -1,0 +1,61 @@
+# One benchmark, with three class conditions. Shared by local and Modal tasks.
+# Counts follow CARS Appendix H; the joint reward and smoke limits are new settings.
+schema_version: 1
+project:
+  name: smiles-cars-mdm-vgb
+  version: 0.1.0
+  task: molecular_generation
+  dataset: cars_smiles
+groups: [acrylates, chain_extenders, isocyanates]
+group: null
+seed: 0
+seeds: [0, 1, 2]
+suite: primary
+
+reward:
+  mode: grammar_rdkit_smarts
+  version: grammar-rdkit-smarts-v1
+
+protocol:
+  target_unique: 100
+  max_root_attempts: 1000
+  exclude_prompt_examples: true
+  uniqueness: canonical_isomeric_smiles
+  count_prefix_aborts: true
+  report_incomplete_runs: true
+  max_model_nfe: null
+  max_compute_seconds: null
+
+paths:
+  artifact_root: .
+  benchmark: assets/benchmark
+  data: data
+  checkpoints: checkpoints
+  outputs: outputs
+  reports: reports
+
+runtime:
+  execution: local
+  modal_volume: smiles-artifacts
+  deterministic: false
+  progress: true
+  log_level: INFO
+
+# Presets are applied after task defaults and before explicit CLI overrides.
+# A smoke run has its own suite and output paths; it is never a primary result.
+suites:
+  primary:
+    reward:
+      mode: grammar_rdkit_smarts
+      version: grammar-rdkit-smarts-v1
+  replication:
+    reward:
+      mode: grammar_only
+      version: grammar-only-v1
+  smoke:
+    reward:
+      mode: grammar_rdkit_smarts
+      version: grammar-rdkit-smarts-v1
+    protocol:
+      target_unique: 2
+      max_root_attempts: 10

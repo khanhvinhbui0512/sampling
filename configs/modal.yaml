@@ -1,0 +1,90 @@
+# Deployment choices for this project, not hyperparameters from either paper.
+schema_version: 1
+app_name: smiles
+python_version: "3.12"
+# Only Modal's image and mount APIs turn these into absolute container paths.
+repo_directory: workspace
+artifact_root: artifacts
+dependency_file: pyproject.toml
+
+images:
+  standard:
+    base_image: nvidia/cuda:12.8.1-cudnn-devel-ubuntu22.04
+    apt_packages: [libgomp1, libglib2.0-0]
+
+volumes:
+  artifacts:
+    name: smiles-artifacts
+    create_if_missing: true
+
+secrets:
+  model_access:
+    name: smiles-model-access
+    required_keys: [HF_TOKEN]
+
+profiles:
+  coordinator:
+    cpu: 1
+    memory_mib: 2048
+    gpu: null
+    timeout_seconds: 86400
+    image: standard
+  cpu:
+    cpu: 4
+    memory_mib: 8192
+    gpu: null
+    timeout_seconds: 3600
+    image: standard
+  data:
+    cpu: 8
+    memory_mib: 32768
+    gpu: null
+    timeout_seconds: 86400
+    image: standard
+  training:
+    cpu: 8
+    memory_mib: 65536
+    gpu: A100-40GB
+    timeout_seconds: 86400
+    image: standard
+  generation:
+    cpu: 4
+    memory_mib: 32768
+    gpu: A100-40GB
+    timeout_seconds: 86400
+    image: standard
+  evaluation:
+    cpu: 4
+    memory_mib: 16384
+    gpu: A10
+    timeout_seconds: 7200
+    image: standard
+  verification:
+    cpu: 4
+    memory_mib: 8192
+    gpu: null
+    timeout_seconds: 3600
+    image: standard
+
+coordinator:
+  profile: coordinator
+  volumes: [artifacts]
+  secrets: []
+
+tasks:
+  prepare_benchmark: {id: T01, profile: cpu, volumes: [artifacts], secrets: []}
+  prepare_corpus: {id: T02, profile: data, volumes: [artifacts], secrets: []}
+  build_tokenizer: {id: T03, profile: data, volumes: [artifacts], secrets: []}
+  fetch_models: {id: T04, profile: data, volumes: [artifacts], secrets: [model_access]}
+  train_mdlm: {id: T05, profile: training, volumes: [artifacts], secrets: []}
+  build_rollouts: {id: T06, profile: generation, volumes: [artifacts], secrets: []}
+  train_verifier: {id: T07, profile: training, volumes: [artifacts], secrets: []}
+  generate_base: {id: T08, profile: generation, volumes: [artifacts], secrets: []}
+  generate_cars: {id: T09, profile: generation, volumes: [artifacts], secrets: []}
+  generate_mdm_vgb: {id: T10, profile: generation, volumes: [artifacts], secrets: []}
+  generate_hybrid: {id: T11, profile: generation, volumes: [artifacts], secrets: []}
+  verify: {id: T12, profile: verification, volumes: [artifacts], secrets: []}
+  evaluate_value: {id: T13, profile: evaluation, volumes: [artifacts], secrets: []}
+  evaluate: {id: T14, profile: evaluation, volumes: [artifacts], secrets: []}
+  compare: {id: T15, profile: cpu, volumes: [artifacts], secrets: []}
+  report: {id: T16, profile: cpu, volumes: [artifacts], secrets: []}

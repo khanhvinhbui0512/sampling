@@ -1,0 +1,40 @@
+defaults: [data.yaml]
+
+# 128 reverse steps and five interior snapshots follow the QM9 rollout config.
+# Class labels, joint binary reward, identity partitions, and output shards are new.
+rollouts:
+  version: smiles-rollouts-v1
+  model:
+    # Supply one with --mdlm-report or --checkpoint. Reports select T05's best model.
+    training_report: null
+    checkpoint_manifest: null
+    device: auto
+    dtype: bfloat16
+  policy: absorbing_reverse
+  reverse:
+    steps: 128
+    end_time: 0.00001
+    final_denoise: true
+  snapshots_per_rollout: 5
+  snapshot_selection: evenly_spaced_interior_transitions
+  # null: one independent root rollout per retained train row carrying each group.
+  # Corpus SMILES are used only to determine the count; roots are fully MASKed.
+  num_rollouts_per_group: null
+  batch_size: 32
+  shard_rows: 10000
+  partition:
+    seed: 0
+    validation_fraction: 0.1
+    algorithm: seeded_identity_rank
+    identity: canonical_molecule_or_exact_invalid_token_string
+    keep_rollout_together: true
+    keep_molecule_together_across_groups: true
+
+suites:
+  smoke:
+    rollouts:
+      reverse:
+        steps: 8
+      num_rollouts_per_group: 4
+      batch_size: 2
+      shard_rows: 100
