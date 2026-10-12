@@ -1,0 +1,41 @@
+defaults: [base.yaml]
+
+generation:
+  method: mdm_vgb
+
+# Practical QM9 shortlist; N is a search multiplier, never a model-NFE count.
+search:
+  version: mdm-vgb-shortlist-v1
+  L_f: 8
+  L_b: 32
+  K: 8
+  B: 1
+  lambda: 0.0
+  temperature: 1.0
+  forward_selection: random
+  backward_selection: low_conf
+  shortlist: sample_with_replacement
+  N: 16
+  N_validation_grid: [1, 2, 4, 8, 16]
+  momentum: false
+  chi: null  # Set 1.0 only with momentum=true.
+  value_floor: 0.0001
+  fallback_forward: false  # QM9 terminal.force_complete=false; optional paid fallback.
+
+value:
+  kind: learned
+  cache_capacity: 128
+  learned:
+    training_report: null  # Supply --verifier-report or --verifier-checkpoint.
+    checkpoint_manifest: null
+    batch_size: 64
+
+suites:
+  smoke:
+    search:
+      L_f: 2
+      L_b: 2
+      K: 2
+      N: 2
+    value:
+      cache_capacity: 8

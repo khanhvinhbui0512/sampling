@@ -1,0 +1,17 @@
+defaults: [mdm_vgb.yaml]
+
+generation:
+  method: hybrid
+
+# Only the provider changes; search settings inherit from mdm_vgb.yaml.
+value:
+  kind: cars
+  m: 16
+  m_validation_grid: [4, 8, 16, 32]
+  trie_max_nodes: 128
+
+suites:
+  smoke:
+    value:
+      m: 4
+      trie_max_nodes: 32

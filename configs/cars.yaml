@@ -1,0 +1,36 @@
+defaults: [data.yaml, models.yaml]
+
+# CARS Algorithm 1 / pinned reference learn_level=3 and constrain_first.
+# q_z on a shared SMILES MDLM is a new setting, separate from AR replication.
+cars:
+  version: cars-frozen-attempt-v1
+  backend: mdlm
+  policy: left_to_right
+  learn_level: 3
+  constrain_first: true
+  temperature: 1.0
+  top_p: 1.0
+  top_k: 0
+  vocabulary: full
+  learning: after_attempt
+  model:
+    training_report: null  # Supply --mdlm-report or --checkpoint.
+    checkpoint_manifest: null
+    device: auto
+    dtype: bfloat16
+  trie:
+    max_nodes: 4096
+    capacity_policy: freeze_new_nodes
+    persist: true
+  checkpoint_every: 25
+  log_every: 25
+  # Only used by the separate AR suite; the MDLM width comes from its tokenizer.
+  max_new_tokens: 256
+
+suites:
+  smoke:
+    cars:
+      trie:
+        max_nodes: 128
+      checkpoint_every: 1
+      log_every: 1

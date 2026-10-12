@@ -18,6 +18,7 @@ dependencies = [
     # Grammar constraints and molecular validation.
     "llguidance==0.7.30",  # CARS paper, Appendix B.
     "rdkit==2025.3.6",  # CARS paper, Appendix B.
+    "syntheseus-retro-star-benchmark @ git+https://github.com/AustinT/syntheseus-retro-star-benchmark.git@2f4e2fa20a5c83c667d7b4de5bce3a35f1420520",
     "xgrammar>=0.1.25,<0.2",
     # Data, configuration, progress logs, and reports.
     "datasets>=3.6,<5",

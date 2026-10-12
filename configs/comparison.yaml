@@ -1,0 +1,58 @@
+defaults: [data.yaml, models.yaml]
+
+comparison:
+  version: smiles-comparison-v1
+  action: run  # run or lock; neither trains models or downloads artifacts.
+  purpose: final  # tuning uses validation; final requires a reviewed selection.
+  lock_manifest: null
+  lock_from: null
+  selected_variant: null
+  methods: [cars, mdm_vgb, hybrid]
+  include_baseline: true
+  model:
+    training_report: null
+    checkpoint_manifest: null
+    device: auto
+    dtype: bfloat16
+  verifier:
+    training_report: null
+    checkpoint_manifest: null
+  task_configs:
+    cars: configs/cars.yaml
+    cars_ar: configs/replication.yaml
+    base: configs/base.yaml
+    mdm_vgb: configs/mdm_vgb.yaml
+    hybrid: configs/hybrid.yaml
+    evaluate: configs/evaluation.yaml
+    report: configs/report.yaml
+  parameters:
+    search: {N: 16}  # Applied identically to learned and hybrid kernels.
+    hybrid: {m: 16}
+  validation_sweep:
+    N: [1, 2, 4, 8, 16]
+    m: [4, 8, 16, 32]
+  # New comparison allowances, not paper hyperparameters. Inner calls count.
+  budgets:
+    - {name: nfe_16384, max_model_nfe: 16384, max_compute_seconds: null}
+    - {name: nfe_65536, max_model_nfe: 65536, max_compute_seconds: null}
+    - {name: time_60, max_model_nfe: null, max_compute_seconds: 60.0}
+    - {name: time_300, max_model_nfe: null, max_compute_seconds: 300.0}
+  retrosynthesis: true
+  value_manifests: []  # Optional, already completed T13 inputs for this purpose.
+
+suites:
+  replication:
+    comparison:
+      methods: [cars_ar]
+      include_baseline: false
+  smoke:
+    seeds: [0]
+    comparison:
+      parameters:
+        search: {N: 2}
+        hybrid: {m: 4}
+      validation_sweep: {N: [2], m: [4]}
+      budgets:
+        - {name: smoke_nfe, max_model_nfe: 64, max_compute_seconds: null}
+        - {name: smoke_time, max_model_nfe: null, max_compute_seconds: 2.0}
+      retrosynthesis: false

@@ -1,0 +1,18 @@
+report:
+  version: smiles-report-v1
+  evaluation_manifests: []
+  value_manifests: []
+  expected_generation_runs: []  # Explicit expected paths; no jobs are launched.
+  bootstrap: {repetitions: 2000, confidence: 0.95, seed: 0}
+  quality_metrics: [success_per_root, attained, validity, membership, unique_fraction, novelty, diversity, retro_score]
+  cost_metrics: [raw_nfe, verifier_forward_calls, tracked_compute_seconds, end_to_end_seconds, inner_model_calls]
+  files:
+    summary: summary.csv
+    aggregates: aggregates.csv
+    paired: paired.csv
+    frontiers: frontiers.csv
+    value_accuracy: value_accuracy.csv
+    missing: missing.csv
+    quality_plot: quality_cost.png
+    value_plot: value_accuracy.png
+    markdown: report.md

@@ -1,0 +1,16 @@
+defaults: [data.yaml, models.yaml]
+
+evaluation:
+  version: smiles-metrics-v1
+  source_run: null  # Directory containing the generation RunRecord and journals.
+  sample_sets: [outputs, search_candidates, selected]
+  fingerprint: {radius: 2, bits: 2048, sensitivity_radii: [3]}
+  novelty_reference: all_prompt_molecular_identities
+  retrosynthesis:
+    enabled: true
+    threshold: 0.4
+    num_results: 1
+    expansion_topk: 50
+    device: auto
+    batch_size: 32
+  reference_forward_flops: null  # Required for measured FLOP-adjusted NFE.

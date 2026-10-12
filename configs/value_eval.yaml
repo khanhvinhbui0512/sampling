@@ -1,0 +1,56 @@
+defaults: [base.yaml]
+
+# New evaluation protocol, not hyperparameters claimed by either paper.
+value:
+  learned:
+    training_report: null  # Supply --verifier-report or --verifier-checkpoint.
+    checkpoint_manifest: null
+    batch_size: 64
+
+value_eval:
+  version: smiles-value-eval-v1
+  purpose: final
+  split: test  # tuning must use validation; final must use test.
+  molecules_per_group: 16
+  mask_fractions: [0.0, 0.25, 0.5, 0.75, 1.0]
+  masking: uniform_fixed_count_over_full_width
+  state_partition_seed: 0
+  validation_state_fraction: 0.2
+  exclude_verifier_identities: true
+  exclude_verifier_states: true
+  require_q_trained_verifier: false
+  repetitions: 3
+  cars:
+    m: 16
+    trie_max_nodes: 128
+    cache_capacity: 0  # Each measured query is fresh, including repetitions.
+  provider_budgets:
+    - {name: primary, max_model_nfe: 4096, max_compute_seconds: 60.0}
+  reference:
+    m: 512
+    batch_size: 32
+    max_model_nfe: 131072
+    max_compute_seconds: 600.0
+    maximum_ci_half_width: 0.05
+    rollout: {steps: 128, end_time: 0.00001, final_denoise: true}
+  calibration_bins: 10
+  mask_fraction_edges: [0.0, 0.25, 0.5, 0.75, 1.0]
+  shard_rows: 16
+  checkpoint_every: 1
+  log_every: 10
+
+suites:
+  smoke:
+    value_eval:
+      molecules_per_group: 2
+      mask_fractions: [0.0, 0.5, 1.0]
+      repetitions: 1
+      cars: {m: 4, trie_max_nodes: 32}
+      provider_budgets:
+        - {name: smoke, max_model_nfe: 1024, max_compute_seconds: 30.0}
+      reference:
+        m: 8
+        batch_size: 4
+        rollout: {steps: 8}
+      shard_rows: 4
+      log_every: 1

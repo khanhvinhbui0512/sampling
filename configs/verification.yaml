@@ -44,31 +44,59 @@ verification:
         test_tokens: {path: data/tokenized/test/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
     cars:
       tests: [tests/test_cars.py]
-      project_files: []
+      project_files:
+        - src/trie.py
+        - src/cars.py
+        - src/tasks/generate_cars.py
+        - modal/generate_cars.py
+        - configs/cars.yaml
+        - configs/replication.yaml
       artifacts:
         benchmark: {path: data/benchmark/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
-        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
     values:
-      tests: [tests/test_values.py]
-      project_files: []
-      artifacts:
-        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
-        # Select a specific rollout run; never silently choose a latest run.
-        rollouts: {path: null, manifest: true, kind: null, checksum: null, metadata: {}}
+      tests: [tests/test_values.py, tests/test_value_eval.py]
+      project_files:
+        - src/values.py
+        - src/reference.py
+        - src/cars.py
+        - src/completion.py
+        - src/tasks/evaluate_value.py
+        - modal/evaluate_value.py
+        - configs/value_eval.yaml
+      artifacts: {}
     integration:
-      tests: [tests/test_integration.py]
-      project_files: []
-      artifacts:
-        benchmark: {path: data/benchmark/manifest.json, manifest: true, kind: null, checksum: null, metadata: {}}
-        tokenizer: {path: data/tokenizer/metadata.json, manifest: false, kind: null, checksum: null, metadata: {}}
-        # These metadata paths identify the checkpoints selected for the run.
-        mdlm_checkpoint: {path: null, manifest: false, kind: null, checksum: null, metadata: {}}
-        verifier_checkpoint: {path: null, manifest: false, kind: null, checksum: null, metadata: {}}
+      tests: [tests/test_integration.py, tests/test_compare.py]
+      project_files:
+        - src/mdm_vgb.py
+        - src/hybrid.py
+        - src/tasks/generation.py
+        - src/tasks/generate_base.py
+        - src/tasks/generate_mdm_vgb.py
+        - src/tasks/generate_hybrid.py
+        - modal/generate_base.py
+        - modal/generate_mdm_vgb.py
+        - modal/generate_hybrid.py
+        - configs/base.yaml
+        - configs/mdm_vgb.yaml
+        - configs/hybrid.yaml
+        - tests/test_values.py
+        - src/tasks/compare.py
+        - modal/compare.py
+        - configs/comparison.yaml
+      artifacts: {}
     metrics:
       tests: [tests/test_metrics.py]
-      project_files: []
-      artifacts:
-        # The run manifest must be completed; its declared files are checked.
-        generation_run: {path: null, manifest: false, kind: null, checksum: null, metadata: {}, run_record: true}
+      project_files:
+        - src/metrics.py
+        - src/retrosynthesis.py
+        - src/reporting.py
+        - src/tasks/evaluate.py
+        - src/tasks/report.py
+        - modal/evaluate.py
+        - modal/report.py
+        - configs/evaluation.yaml
+        - configs/report.yaml
+      # T14 checks real generation artifacts; unit checks use finite fixtures.
+      artifacts: {}
     all:
       includes: [environment, benchmark, corpus, cars, values, integration, metrics]

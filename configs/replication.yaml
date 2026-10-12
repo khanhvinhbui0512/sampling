@@ -1,0 +1,28 @@
+defaults: [cars.yaml]
+suite: replication
+
+# Original few-shot prompts and grammar-only acceptance, separate from primary.
+# The pinned source defaults to 512 tokens / 2,000 attempts; use paper settings.
+cars:
+  backend: ar
+  policy: bounded_ar
+  max_new_tokens: 256
+  trie:
+    # Full Llama-vocabulary vectors are much larger than SMILES vocabulary vectors.
+    max_nodes: 128
+
+models:
+  llama:
+    model_id: meta-llama/Llama-3.1-8B-Instruct
+    revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    tokenizer_id: meta-llama/Llama-3.1-8B-Instruct
+    tokenizer_revision: 0e9e39f249a16976918f6564b8830bc894c89659
+    dtype: bfloat16
+    temperature: 1.0
+    top_p: 1.0
+    top_k: 0
+
+protocol:
+  target_unique: 100
+  max_root_attempts: 1000
+seeds: [0, 1, 2]

@@ -1,0 +1,30 @@
+defaults: [data.yaml]
+
+generation:
+  version: shared-mdlm-generation-v1
+  method: base
+  model:
+    training_report: null  # Supply --mdlm-report or --checkpoint.
+    checkpoint_manifest: null
+    device: auto
+    dtype: bfloat16
+  checkpoint_every: 25
+  checkpoint_every_steps: 25
+  log_every: 25
+  baseline:
+    policy: absorbing_reverse
+    steps: 128
+    end_time: 0.00001
+    final_denoise: true
+    temperature: 1.0
+    vocabulary: full
+    known_tokens: preserve_all
+
+suites:
+  smoke:
+    generation:
+      checkpoint_every: 1
+      checkpoint_every_steps: 1
+      log_every: 1
+      baseline:
+        steps: 8

@@ -138,6 +138,15 @@ class ToyValueProvider:
     def value(self, state: SmilesState) -> float:
         return self.values([state])[0]
 
+    def state_dict(self) -> dict:
+        return {"target": self.target, "forward_calls": self.forward_calls}
+
+    def load_state_dict(self, payload: dict) -> None:
+        if payload["target"] != self.target:
+            raise ValueError("Toy value target differs")
+        require_count(payload["forward_calls"], "toy value forward calls")
+        self.forward_calls = payload["forward_calls"]
+
 
 @pytest.fixture
 def special_tokens() -> SpecialTokens:

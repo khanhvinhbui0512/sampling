@@ -283,7 +283,10 @@ class MDLMAdapter:
         return cls(model, model_id="mdlm:" + config_digest(identity), tracker=tracker, inner=inner)
 
     @torch.inference_mode()
-    def logits_batch(self, states: Sequence[SmilesState], *, times: torch.Tensor | None = None) -> torch.Tensor:
+    def logits_batch(self, states: Sequence[SmilesState], *, times: torch.Tensor | None = None,
+                     preserve_known: bool = True) -> torch.Tensor:
+        if type(preserve_known) is not bool:
+            raise TypeError("preserve_known must be boolean")
         if not states or len({len(state.token_ids) for state in states}) != 1:
             raise ValueError("MDLM inference requires a nonempty batch of equal-width states")
         for state in states:
@@ -315,11 +318,21 @@ class MDLMAdapter:
         # observed coordinates are delta distributions. Keep every other token.
         logits[..., self.special_tokens.mask_id] = -torch.inf
         known = ids != self.special_tokens.mask_id
-        if known.any():
+        if preserve_known and known.any():
             logits[known] = -torch.inf
             rows, positions = known.nonzero(as_tuple=True)
             logits[rows, positions, ids[rows, positions]] = 0.0
         return logits
+
+    def proposal_logits_batch(self, states: Sequence[SmilesState]) -> torch.Tensor:
+        """Raw denoiser confidence for search, including revealed coordinates.
+
+        As in the QM9 harness, low-confidence remasking uses the denoiser's
+        current-state score, rather than the absorbing copy distribution.
+        Sampling callers still preserve coordinates through explicit updates.
+        This invocation owns the same ordinary forward/NFE accounting.
+        """
+        return self.logits_batch(states, preserve_known=False)
 
     def probabilities_batch(self, states: Sequence[SmilesState], *, times=None) -> torch.Tensor:
         return self.logits_batch(states, times=times).softmax(-1)
