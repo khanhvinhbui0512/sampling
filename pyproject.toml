@@ -1,0 +1,44 @@
+# Miniconda environment setup:
+#   conda create --name sampling python=3.10 pip
+#   conda activate sampling
+#   python -m pip install -e .
+
+[build-system]
+requires = ["setuptools>=77.0.3", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sampling"
+version = "0.1.0"
+description = ""
+requires-python = ">=3.10"
+authors = [
+  {name = "Vinh Khanh Bui"},
+  {name = "Nguyen Nam"},
+  {name = "Nguyen Tuan Binh"},
+  {name = "Vuong Nguyen Thuy Duong"},
+]
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = [
+  "numpy",
+  "pyyaml",
+  "datasets",
+  "einops",
+  "evodiff",
+  "h5py",
+  "huggingface_hub",
+  "omegaconf",
+  "rdkit",
+  "torch",
+  "transformers",
+  "tqdm",
+]
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src", "src.*"]
+exclude = ["src.model_data", "src.model_data.*"]

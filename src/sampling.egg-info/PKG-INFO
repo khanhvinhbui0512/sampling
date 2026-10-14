@@ -1,0 +1,18 @@
+Metadata-Version: 2.4
+Name: sampling
+Version: 0.1.0
+Author: Vinh Khanh Bui, Nguyen Nam, Nguyen Tuan Binh, Vuong Nguyen Thuy Duong
+License-Expression: MIT
+Requires-Python: >=3.10
+Requires-Dist: numpy
+Requires-Dist: pyyaml
+Requires-Dist: datasets
+Requires-Dist: einops
+Requires-Dist: evodiff
+Requires-Dist: h5py
+Requires-Dist: huggingface_hub
+Requires-Dist: omegaconf
+Requires-Dist: rdkit
+Requires-Dist: torch
+Requires-Dist: transformers
+Requires-Dist: tqdm

@@ -1,0 +1,6 @@
+pyproject.toml
+src/sampling.egg-info/PKG-INFO
+src/sampling.egg-info/SOURCES.txt
+src/sampling.egg-info/dependency_links.txt
+src/sampling.egg-info/requires.txt
+src/sampling.egg-info/top_level.txt

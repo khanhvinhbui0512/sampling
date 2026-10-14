@@ -1,0 +1,12 @@
+numpy
+pyyaml
+datasets
+einops
+evodiff
+h5py
+huggingface_hub
+omegaconf
+rdkit
+torch
+transformers
+tqdm
