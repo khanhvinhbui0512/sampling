@@ -6,18 +6,20 @@ import time
 
 from tqdm.auto import tqdm
 
-from algorithms.algorithm_utils import force_complete
-from algorithms.config import (
+from src.algorithms.algorithm_utils import force_complete
+from src.algorithms.config import (
     ALGORITHMS,
     apply_budget_overrides,
     algorithm_slug,
+    cars_config,
     value_guidance_config,
     value_guidance_section,
 )
-from algorithms.vgb import sample_vgb
-from algorithms.vgb_momentum import sample_vgb_momentum
-from algorithms.vgr import sample_vgr
-from tasks import evaluate_rows, load_harness, load_task_module, load_verifier, normalize_task_name
+from src.algorithms.cars import sample_cars
+from src.algorithms.vgb import sample_vgb
+from src.algorithms.vgb_momentum import sample_vgb_momentum
+from src.algorithms.vgr import sample_vgr
+# from tasks import evaluate_rows, load_harness, load_task_module, load_verifier, normalize_task_name
 from utils import (
     add_nfe_metrics,
     cleanup_distributed,
@@ -33,19 +35,7 @@ from utils import (
 )
 
 
-def parse_args():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--task", default="qm9", help="Task name under configs/<task>.")
-    parser.add_argument("--stage", default="inference", choices=["inference", "rollout", "verifier_training"], help=argparse.SUPPRESS)
-    parser.add_argument("--algorithm", default="Base", choices=sorted(ALGORITHMS))
-    parser.add_argument("--device", default=None)
-    parser.add_argument("--count", type=int, default=None)
-    parser.add_argument("--N", type=int, default=None, help="BoN candidate count or VGB maximum Markov-step budget factor.")
-    parser.add_argument("--K", default=None)
-    parser.add_argument("--max-steps-multiplier", type=int, default=None, help="Set the VGB maximum Markov-step budget factor directly.")
-    parser.add_argument("--output", default=None)
-    parser.add_argument("--verifier", default=None)
-    return parser.parse_args()
+
 
 
 def maybe_set_forward_token_filter(task_module, harness, examples, cfg):
@@ -304,6 +294,20 @@ def run_bon(task_module, harness, examples, config, rank=0):
     return rows
 
 
+def run_cars(task_module, harness, examples, config, rank=0):
+    cfg = cars_config(config)
+    cfg["progress"] = rank == 0
+    cfg["progress_desc"] = "CARS inference"
+    samples = sample_cars(harness, task_module, examples, config=cfg)
+    rows = []
+    for example, sample in zip(examples, samples):
+        row = build_row(task_module, example, harness, sample["output"], sample["state"], dict(sample["stats"]))
+        if "last_attempt_output" in sample:
+            row["last_attempt_output"] = sample["last_attempt_output"]
+        rows.append(row)
+    return rows
+
+
 def run_value_guided(
     task_module,
     harness,
@@ -389,18 +393,24 @@ def collect_rows(rows, output, dist_info):
     return [row for part in gathered for row in part]
 
 
-def main():
-    args = parse_args()
-    config = load_task_config(args.task, stage=args.stage)
+def main(args: argparse.Namespace):
+    from pathlib import Path
+
+    import task as task_module
+    from harness import load as load_qm9_harness
+    from utils import load_config, repo_root
+
+    config_path = Path(args.config)
+    if not config_path.is_absolute():
+        config_path = repo_root() / config_path
+    config = load_config(config_path)
+    task_name = str(config.get("task", args.task)).lower()
+    if task_name != "qm9":
+        raise ValueError("This entry point supports only the qm9 task.")
     if args.count is not None:
         config.setdefault("data", {})["count"] = int(args.count)
     value_guidance_cfg = value_guidance_section(config)
-    apply_budget_overrides(
-        config,
-        args.algorithm,
-        n=args.N,
-        max_steps_multiplier=args.max_steps_multiplier,
-    )
+    apply_budget_overrides(config,args.algorithm,n=args.N,max_steps_multiplier=args.max_steps_multiplier,)
     if args.K is not None:
         value_guidance_cfg["K"] = args.K if str(args.K).lower() == "all" else int(args.K)
     if args.output is not None:
@@ -414,20 +424,39 @@ def main():
     set_seed(seed)
     logger = setup_logging(config.get("logging", {}).get("level", "INFO"))
 
-    task_name = normalize_task_name(config.get("task", args.task))
-    task_module = load_task_module(task_name)
-    examples = shard_items(load_examples(task_module, config), dist_info)
     device = args.device or dist_info.get("device")
     try:
-        harness = load_harness(task_name, config, device=device)
+        examples = load_examples(task_module, config)
+        count = config.get("data", {}).get("count")
+        if count is not None and int(count) >= 0:
+            examples = examples[:int(count)]
+        examples = shard_items(examples, dist_info)
+
+        model_config = {key: value for key, value in config.get("model", {}).items() if value is not None}
+        for key in ("model_name", "tokenizer_path"):
+            path = Path(model_config[key])
+            if not path.is_absolute():
+                path = repo_root() / path
+            model_config[key] = str(path)
+        harness = load_qm9_harness(device=device, **model_config)
 
         rank = int(dist_info["rank"])
         if args.algorithm == "Base":
             rows = run_base(task_module, harness, examples, config, rank=rank)
         elif args.algorithm == "BoN":
             rows = run_bon(task_module, harness, examples, config, rank=rank)
+        elif args.algorithm == "CARS":
+            rows = run_cars(task_module, harness, examples, config, rank=rank)
         else:
-            verifier = load_verifier(task_name, config, harness=harness, device=device)
+            from verifier import load as load_qm9_verifier
+
+            verifier_config = {key: value for key, value in config.get("verifier", {}).items() if value is not None}
+            if verifier_config.get("checkpoint"):
+                checkpoint = Path(verifier_config["checkpoint"])
+                if not checkpoint.is_absolute():
+                    checkpoint = repo_root() / checkpoint
+                verifier_config["checkpoint"] = str(checkpoint)
+            verifier = load_qm9_verifier(harness=harness, device=device, **verifier_config)
             rows = run_value_guided(task_module, harness, verifier, examples, config, args.algorithm, rank=rank)
 
         output = resolve_output(config, task_name, args.algorithm, args.stage)
@@ -437,7 +466,7 @@ def main():
         if output:
             logger.info("wrote %d rows to %s", len(rows), output)
 
-        metrics = evaluate_rows(task_name, rows, config=config)
+        metrics = task_module.metrics(rows)
         metrics = add_nfe_metrics(metrics, rows)
         log_metrics(metrics, logger)
     finally:
@@ -445,4 +474,16 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="config/qm9/qm9_inference.yaml", help="Path to the inference YAML config.")
+    parser.add_argument("--task", default="qm9", choices=["qm9"], help="QM9 inference task.")
+    parser.add_argument("--stage", default="inference", choices=["inference", "rollout", "verifier_training"], help=argparse.SUPPRESS)
+    parser.add_argument("--algorithm", default="Base", choices=sorted(ALGORITHMS))
+    parser.add_argument("--device", default=None)
+    parser.add_argument("--count", type=int, default=None)
+    parser.add_argument("--N", type=int, default=None, help="BoN candidate count or CARS/VGB step budget multiplier.")
+    parser.add_argument("--K", default=None)
+    parser.add_argument("--max-steps-multiplier", type=int, default=None, help="Set the CARS/VGB step budget multiplier directly.")
+    parser.add_argument("--output", default=None)
+    parser.add_argument("--verifier", default=None)
+    main(parser.parse_args())

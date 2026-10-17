@@ -109,6 +109,8 @@ class QM9MdlmHarness:
         self.model.to(self.device)
         self.model.eval()
         self.mask_id = int(self.tokenizer.mask_token_id)
+        eos_id = self.tokenizer.eos_token_id
+        self.eos_id = self.tokenizer.sep_token_id if eos_id is None else eos_id
         self.vocab_size = int(getattr(self.tokenizer, "vocab_size", self.model.config.vocab_size))
         model_vocab_size = int(self.model.config.vocab_size)
         if model_vocab_size != self.vocab_size:

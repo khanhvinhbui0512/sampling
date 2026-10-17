@@ -125,6 +125,13 @@ def make_prompt(example):
     return str(example.get("prompt") or "")
 
 
+def cars_context_key(example, harness):
+    # QM9 reward depends only on the generated molecule. The sampler also keys
+    # the trie by prompt and initial state, so validation examples can reuse it.
+    del example, harness
+    return "qm9"
+
+
 def default_length(example):
     if example.get("initial_state") is not None:
         return len(example["initial_state"])

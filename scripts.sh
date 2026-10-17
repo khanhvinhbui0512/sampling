@@ -1,0 +1,2 @@
+CUDA_VISIBLE_DEVICES=7 python src/qm9/inference.py --config config/qm9/qm9_inference.yaml --algorithm VGR
+CUDA_VISIBLE_DEVICES=7 python src/qm9/inference.py --config config/qm9/qm9_inference.yaml --algorithm BoN

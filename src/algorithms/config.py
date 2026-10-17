@@ -1,7 +1,11 @@
-ALGORITHMS = {"Base", "BoN", "VGR", "VGB", "VGB-Momentum"}
+ALGORITHMS = {"Base", "BoN", "CARS", "VGR", "VGB", "VGB-Momentum"}
 VALUE_GUIDED_ALGORITHMS = {"BoN", "VGR", "VGB", "VGB-Momentum"}
 VGB_ALGORITHMS = {"VGB", "VGB-Momentum"}
-ALGORITHM_CONFIG_KEYS = {"BoN", "value_guidance"}
+ALGORITHM_CONFIG_KEYS = {"BoN", "CARS", "value_guidance"}
+CARS_CONFIG_KEYS = {
+    "batch_size", "length", "max_steps", "max_steps_multiplier",
+    "prune_terminal_tokens", "reward_threshold", "stop_on_eos", "temperature",
+}
 VALUE_GUIDANCE_SECTION_KEYS = {"backward", "momentum", "state_value", "terminal", "budget"}
 VALUE_GUIDANCE_BASE_KEYS = {
     "L_f",
@@ -78,9 +82,17 @@ def apply_budget_overrides(config, algorithm, n=None, max_steps_multiplier=None)
 
     if algorithm == "BoN":
         if max_steps_multiplier is not None:
-            raise ValueError("--max-steps-multiplier is only supported for VGB and VGB-Momentum")
+            raise ValueError("--max-steps-multiplier is only supported for CARS, VGB, and VGB-Momentum")
         if n is not None:
             _section(_section(config, "algorithms"), "BoN")["N"] = n
+        return
+
+    if algorithm == "CARS":
+        if n is not None and max_steps_multiplier is not None and n != max_steps_multiplier:
+            raise ValueError("--N and --max-steps-multiplier must match when both are provided")
+        multiplier = n if n is not None else max_steps_multiplier
+        if multiplier is not None:
+            _section(_section(config, "algorithms"), "CARS")["max_steps_multiplier"] = multiplier
         return
 
     if algorithm in VGB_ALGORITHMS:
@@ -92,9 +104,9 @@ def apply_budget_overrides(config, algorithm, n=None, max_steps_multiplier=None)
         return
 
     if n is not None:
-        raise ValueError("--N is only supported for BoN, VGB, and VGB-Momentum")
+        raise ValueError("--N is only supported for BoN, CARS, VGB, and VGB-Momentum")
     if max_steps_multiplier is not None:
-        raise ValueError("--max-steps-multiplier is only supported for VGB and VGB-Momentum")
+        raise ValueError("--max-steps-multiplier is only supported for CARS, VGB, and VGB-Momentum")
 
 
 def algorithm_slug(algorithm):
@@ -114,6 +126,23 @@ def _algorithms_config(config):
 
 def _value_guidance_root(config):
     return dict_section(_algorithms_config(config), "value_guidance")
+
+
+def cars_config(config):
+    algorithms = _algorithms_config(config)
+    section = algorithms.get("CARS", {})
+    if not isinstance(section, dict):
+        raise TypeError("algorithms.CARS must be a mapping")
+    extra = sorted(set(section) - CARS_CONFIG_KEYS)
+    if extra:
+        raise ValueError(f"unknown algorithms.CARS keys: {extra}")
+    generation = dict_section(config, "generation")
+    cfg = {"batch_size": generation.get("batch_size", 64),
+           "temperature": generation.get("temperature", 1.0),
+           "max_steps_multiplier": 16, "reward_threshold": 1.0,
+           "stop_on_eos": False, "prune_terminal_tokens": True}
+    cfg.update(section)
+    return cfg
 
 
 def _value_guidance_base(config):

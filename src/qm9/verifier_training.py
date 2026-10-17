@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from torch.nn.parallel import DistributedDataParallel
 from tqdm.auto import tqdm
 
-from .verifier import QM9Verifier, save_verifier
+from verifier import QM9Verifier, save_verifier
 from utils import (
     barrier,
     cleanup_distributed,
@@ -18,6 +18,8 @@ from utils import (
     rollout_rows_from_payload,
     set_seed,
     verifier_training_config,
+    load_yaml,
+    setup_logging
 )
 
 
@@ -206,23 +208,27 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-    config = load_task_config(args.task, stage="verifier_training")
-    set_seed(config.get("seed"))
-    logger = setup_logging(config.get("logging", {}).get("level", "INFO"))
-    task = normalize_task_name(config.get("task", args.task))
+def main(args: argparse.Namespace):
+    import task as qm9_task
+    from utils import load_config, repo_root
 
-    try:
-        module = load_task_component(task, "train_verifier")
-    except ModuleNotFoundError as exc:
-        expected = f"tasks.{task}.train_verifier"
-        if exc.name != expected:
-            raise
-        logger.info("%s uses an exact verifier; no verifier training step is required", task)
-        return
-    module.train_from_config(config=config, device=args.device)
+    config = load_config(args.config or repo_root() / "config/qm9/qm9_verifier_training.yaml")
+    set_seed(config.get("seed"))
+    setup_logging(config.get("logging", {}).get("level", "INFO"))
+    qm9_task.configure(config)
+
+    def reward_fn(row):
+        if "qed" in row:
+            return qm9_task._shape_reward(float(row["qed"]))
+        return qm9_task.reward(None, row.get("output", ""))
+
+    data_path, output_dir, train_cfg = verifier_training_config(config, getattr(args, "device", None))
+    require_known_keys(train_cfg, TRAINING_KEYS, "QM9 verifier training")
+    train_cfg["reward_fn"] = reward_fn
+    return train(data_path=data_path, output_dir=output_dir, **train_cfg)
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser("Verifier Training")
+    parser.add_argument("--config",default=None,help="Path to the YAML configuration file.",)
+    main(parser.parse_args())
