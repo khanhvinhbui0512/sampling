@@ -1,0 +1,53 @@
+task: qm9
+output: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/{algorithm}.jsonl
+
+data:
+  split: val
+
+model:
+  model_name: /mnt/data2/vinhbk/sampling-50000/model_data/qm9/mdlm_qm9/last
+  tokenizer_path: /mnt/data2/vinhbk/sampling-50000/model_data/qm9/qm9-tokenizer
+  max_length: 32
+  dtype: bf16
+
+verifier:
+  checkpoint: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/verifier-200/verifier.pt
+
+generation:
+  max_new_tokens: 32
+  steps: 32
+  batch_size: 256
+  temperature: 1.0
+
+algorithms:
+  CARS:
+    max_steps_multiplier: 16
+    reward_threshold: 1.0
+    stop_on_eos: false
+    prune_terminal_tokens: true
+  value_guidance:
+    length: 32
+    max_steps_multiplier: 16
+    L_f: 8
+    K: 8
+    forward_selection: random
+    temperature: 1.0
+    stop_on_eos: false
+    backward:
+      L_b: 32
+      B: 1
+      lambda: 0.0
+      backward_selection: low_conf
+    momentum:
+      chi: 1.0
+    terminal:
+      reject: backtrack
+      force_complete: false
+  BoN:
+    N: 16
+data:
+  split: val
+  dataset_dir: /mnt/data2/vinhbk/sampling-50000/data/qm9/dataset
+reward:
+  mode: quantile_indicator
+  threshold: 0.5614854131280362

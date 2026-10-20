@@ -1,7 +1,7 @@
 defaults:
   - qm9_inference.yaml
 
-output: /mnt/data2/vinhbk/sampling/outputs/qm9/base_rollout.pt
+output: /mnt/data2/vinhbk/sampling-25000/outputs/qm9/base_rollout.pt
 
 data:
   split: train

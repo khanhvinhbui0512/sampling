@@ -1,17 +1,17 @@
 task: qm9
-output: /mnt/data2/vinhbk/sampling/outputs/qm9/{algorithm}.jsonl
+output: /mnt/data2/vinhbk/sampling-25000/outputs/qm9/{algorithm}.jsonl
 
 data:
   split: val
 
 model:
-  model_name: /mnt/data2/vinhbk/sampling/model_data/qm9/mdlm_qm9/last
-  tokenizer_path: /mnt/data2/vinhbk/sampling/model_data/qm9/qm9-tokenizer
+  model_name: /mnt/data2/vinhbk/sampling-25000/model_data/qm9/mdlm_qm9/last
+  tokenizer_path: /mnt/data2/vinhbk/sampling-25000/model_data/qm9/qm9-tokenizer
   max_length: 32
   dtype: bf16
 
 verifier:
-  checkpoint: /mnt/data2/vinhbk/sampling/outputs/qm9/verifier/verifier.pt
+  checkpoint: /mnt/data2/vinhbk/sampling-25000/outputs/qm9/verifier-100/verifier.pt
 
 generation:
   max_new_tokens: 32
@@ -47,7 +47,7 @@ algorithms:
     N: 16
 data:
   split: val
-  dataset_dir: /mnt/data2/vinhbk/sampling/data/qm9/dataset
+  dataset_dir: /mnt/data2/vinhbk/sampling-25000/data/qm9/dataset
 reward:
   mode: quantile_indicator
   threshold: 0.5614854131280362

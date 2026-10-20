@@ -1,19 +1,19 @@
 model:
-  tokenizer_path: /mnt/data2/vinhbk/sampling/model_data/qm9/qm9-tokenizer
+  tokenizer_path: /mnt/data2/vinhbk/sampling-25000/model_data/qm9/qm9-tokenizer
   max_length: 32
   dtype: bf16
 
 data:
   split: train
-  dataset_dir: /mnt/data2/vinhbk/sampling/data/qm9/dataset
-  cache_dir: /mnt/data2/vinhbk/sampling/data/qm9/cache
+  dataset_dir: /mnt/data2/vinhbk/sampling-25000/data/qm9/dataset
+  cache_dir: /mnt/data2/vinhbk/sampling-25000/data/qm9/cache
 
 training:
   base_model:
     model_kind: mdlm
     init_from_scratch: true
     model_source: src/qm9/mdlm_source
-    output_dir: /mnt/data2/vinhbk/sampling/model_data/qm9/mdlm_qm9
+    output_dir: /mnt/data2/vinhbk/sampling-25000/model_data/qm9/mdlm_qm9
     seed: 1
     eval_split_size: 0.05
     global_batch_size: 256
