@@ -3,11 +3,11 @@ defaults:
 
 training:
   data: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/base_rollout.pt
-  output_dir: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/verifier-200
+  output_dir: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/verifier-300
   verifier:
     vocab_size: 40
     max_length: 32
-    epochs: 200
+    epochs: 300
     global_batch_size: 2048
     lr: 0.0001
     weight_decay: 0.0

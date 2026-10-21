@@ -11,7 +11,7 @@ model:
   dtype: bf16
 
 verifier:
-  checkpoint: /mnt/data2/vinhbk/sampling-25000/outputs/qm9/verifier-200/verifier.pt
+  checkpoint: /mnt/data2/vinhbk/sampling-25000/outputs/qm9/verifier-100/verifier.pt
 
 generation:
   max_new_tokens: 32

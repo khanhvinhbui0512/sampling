@@ -2,8 +2,8 @@ defaults:
   - qm9_inference.yaml
 
 training:
-  data: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/base_rollout.pt
-  output_dir: /mnt/data2/vinhbk/sampling-50000/outputs/qm9/verifier
+  data: /mnt/data2/vinhbk/sampling-75000/outputs/qm9/base_rollout.pt
+  output_dir: /mnt/data2/vinhbk/sampling-75000/outputs/qm9/verifier-200
   verifier:
     vocab_size: 40
     max_length: 32

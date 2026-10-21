@@ -17,4 +17,4 @@ CUDA_VISIBLE_DEVICES=5 python src/qm9/inference.py --config config/qm9/qm9_infer
 CUDA_VISIBLE_DEVICES=5 python src/qm9/inference.py --config config/qm9/qm9_inference.yaml --algorithm VGB
 CUDA_VISIBLE_DEVICES=5 python src/qm9/inference.py --config config/qm9/qm9_inference.yaml --algorithm VGB-Momentum
 
-CUDA_VISIBLE_DEVICES=5 python src/qm9/inference.py --config config/qm9/qm9_inference.yaml --algorithm CARS
+CUDA_VISIBLE_DEVICES=6 python src/qm9/inference.py --config config/qm9/qm9_inference.yaml --algorithm CARS
